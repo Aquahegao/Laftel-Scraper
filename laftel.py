@@ -1,6 +1,11 @@
 import sqlite3
 import requests
 
+con = sqlite3.connect('laftel.db')
+cur = con.cursor()
+cur.execute('CREATE TABLE IF NOT EXISTS anime (id text, name text)')
+cur.execute('DELETE FROM anime')
+
 header = {'laftel' : 'TeJava'}
 base_url = f'https://laftel.net/api/search/v1/discover/'
 response = requests.get(url=base_url, headers=header)
@@ -16,8 +21,6 @@ while True:
         name = r['name']
         data.append((index, name))
 
-    con = sqlite3.connect('laftel.db')
-    cur = con.cursor()
     cur.executemany("INSERT INTO anime(id, name) VALUES(?,?)", data)
     con.commit()
     url = js['next']
@@ -27,3 +30,4 @@ while True:
     except requests.exceptions.MissingSchema:
         print("크롤링 완료")
         break
+con.close()
